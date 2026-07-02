@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #fbfaf7;
+  color: #2f3430;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
