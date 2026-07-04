@@ -1,8 +1,12 @@
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { owners, users, vehicles } from "@/lib/sample-data";
+import { getAdminUsers, getAdminVehicles, getOwnerProfiles } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 
-export default function AdminUsersPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminUsersPage() {
+  const [users, owners, vehicles] = await Promise.all([getAdminUsers(), getOwnerProfiles(), getAdminVehicles()]);
+
   return (
     <main className="mx-auto grid max-w-7xl gap-6 px-4 py-10 lg:grid-cols-[260px_1fr]">
       <AdminSidebar />

@@ -1,11 +1,14 @@
 import { OwnerSidebar } from "@/components/OwnerSidebar";
-import { bookings, owners, vehicles } from "@/lib/sample-data";
+import { getAdminVehicles, getBookings, getOwnerProfiles } from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { BookingStatusBadge } from "@/components/BookingStatusBadge";
 
 const currentOwnerId = "o1";
 
-export default function OwnerDashboardPage() {
+export const dynamic = "force-dynamic";
+
+export default async function OwnerDashboardPage() {
+  const [owners, vehicles, bookings] = await Promise.all([getOwnerProfiles(), getAdminVehicles(), getBookings()]);
   const owner = owners.find((item) => item.id === currentOwnerId);
   const ownerVehicles = vehicles.filter((vehicle) => vehicle.ownerId === currentOwnerId);
   const ownerBookings = bookings.filter((booking) => ownerVehicles.some((vehicle) => vehicle.id === booking.vehicleId));

@@ -1,10 +1,13 @@
 import { OwnerSidebar } from "@/components/OwnerSidebar";
 import { VehicleCard } from "@/components/VehicleCard";
-import { vehicles } from "@/lib/sample-data";
+import { getAdminVehicles } from "@/lib/data";
 
 const currentOwnerId = "o1";
 
-export default function OwnerVehiclesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function OwnerVehiclesPage() {
+  const vehicles = await getAdminVehicles();
   const ownerVehicles = vehicles.filter((vehicle) => vehicle.ownerId === currentOwnerId);
 
   return (

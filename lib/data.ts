@@ -1,6 +1,6 @@
 import { createServerClient } from "./supabase-server";
-import { vehicles as sampleVehicles } from "./sample-data";
-import { Vehicle } from "./types";
+import { bookings as sampleBookings, owners as sampleOwners, users as sampleUsers, vehicles as sampleVehicles } from "./sample-data";
+import { Booking, OwnerProfile, UserAccount, Vehicle } from "./types";
 
 type VehicleRow = {
   id: string;
@@ -55,6 +55,81 @@ export async function getVehicleBySlug(slug: string) {
   const { data, error } = await supabase.from("vehicles").select("*").eq("slug", slug).single();
   if (error || !data) return null;
   return mapVehicle(data as VehicleRow);
+}
+
+export async function getAdminUsers(): Promise<UserAccount[]> {
+  const supabase = createServerClient();
+  if (!supabase) return sampleUsers;
+
+  const { data, error } = await supabase.from("profiles").select("id, role, full_name, phone, status, created_at, users(email)").order("created_at", { ascending: false });
+  if (error || !data) return [];
+
+  return data.map((row) => {
+    const relatedUser = row.users as unknown as { email?: string } | { email?: string }[] | null;
+    const email = Array.isArray(relatedUser) ? relatedUser[0]?.email ?? "" : relatedUser?.email ?? "";
+
+    return {
+    id: row.id,
+    role: row.role,
+    fullName: row.full_name,
+    email,
+    phone: row.phone ?? undefined,
+    status: row.status,
+    createdAt: row.created_at
+    };
+  });
+}
+
+export async function getOwnerProfiles(): Promise<OwnerProfile[]> {
+  const supabase = createServerClient();
+  if (!supabase) return sampleOwners;
+
+  const { data, error } = await supabase.from("owner_profiles").select("*").order("created_at", { ascending: false });
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    displayName: row.display_name,
+    fiscalName: row.fiscal_name ?? "",
+    location: row.public_location ?? "",
+    rating: 0,
+    verified: row.verified,
+    payoutStatus: row.payout_status
+  }));
+}
+
+export async function getAdminVehicles(): Promise<Vehicle[]> {
+  const supabase = createServerClient();
+  if (!supabase) return sampleVehicles;
+
+  const { data, error } = await supabase.from("vehicles").select("*").order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return Promise.all(data.map((row) => mapVehicle(row as VehicleRow)));
+}
+
+export async function getBookings(): Promise<Booking[]> {
+  const supabase = createServerClient();
+  if (!supabase) return sampleBookings;
+
+  const { data, error } = await supabase.from("bookings").select("*").order("created_at", { ascending: false });
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    vehicleId: row.vehicle_id,
+    customerName: row.customer_name,
+    customerEmail: row.customer_email,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    guests: row.guests,
+    status: row.status,
+    total: Number(row.total_amount),
+    depositAmount: Number(row.deposit_amount),
+    signalAmount: Number(row.signal_amount),
+    extras: [],
+    message: row.message ?? undefined
+  }));
 }
 
 async function mapVehicle(row: VehicleRow): Promise<Vehicle> {
