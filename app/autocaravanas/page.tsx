@@ -1,8 +1,12 @@
 import { SlidersHorizontal } from "lucide-react";
 import { VehicleCard } from "@/components/VehicleCard";
-import { vehicles } from "@/lib/sample-data";
+import { getPublicVehicles } from "@/lib/data";
 
-export default function VehiclesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function VehiclesPage() {
+  const vehicles = await getPublicVehicles();
+
   return (
     <main className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[280px_1fr]">
       <aside className="h-fit rounded-lg border border-stone-200 bg-white p-5">

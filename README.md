@@ -30,6 +30,14 @@ Copie `.env.example` para `.env.local` e preencha as chaves necessárias:
 cp .env.example .env.local
 ```
 
+Em produção, configure as mesmas variáveis no Cloudflare:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `RESEND_API_KEY` ou variáveis SMTP
+
 ## Supabase
 
 1. Crie um projeto Supabase.
@@ -93,7 +101,21 @@ O esquema inclui tabelas para `profiles`, `vehicles`, imagens, equipamentos, cam
 
 ## Conta de administrador
 
-No Supabase Auth, crie manualmente um utilizador administrador e depois atualize o perfil:
+Depois de configurar `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`, crie a primeira conta admin:
+
+```bash
+ADMIN_EMAIL=admin@rotalivre.pt ADMIN_NAME="Administrador" pnpm create-admin
+```
+
+O script imprime a password gerada. Guarde-a num gestor de passwords.
+
+Também pode definir uma password manual:
+
+```bash
+ADMIN_EMAIL=admin@rotalivre.pt ADMIN_PASSWORD="uma-password-forte" pnpm create-admin
+```
+
+Se criar manualmente um utilizador no Supabase Auth, atualize o perfil:
 
 ```sql
 update profiles
@@ -102,6 +124,10 @@ where id = '<uuid-do-utilizador-admin>';
 ```
 
 As contas de proprietário devem começar como `pendente`; o administrador valida o perfil de proprietário e publica os anúncios.
+
+## Produção
+
+O site usa Supabase para registos, autenticação, veículos e reservas quando as variáveis de ambiente estão configuradas. Os dados em `lib/sample-data.ts` servem apenas como fallback local sem Supabase.
 
 ## Dados de exemplo
 

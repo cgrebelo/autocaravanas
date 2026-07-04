@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, CalendarCheck, CarFront, CreditCard, MapPinned, type LucideIcon } from "lucide-react";
 import { VehicleCard } from "@/components/VehicleCard";
-import { vehicles } from "@/lib/sample-data";
+import { getPublicVehicles } from "@/lib/data";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const vehicles = (await getPublicVehicles()).slice(0, 3);
   const steps: { label: string; icon: LucideIcon }[] = [
     { label: "Escolha a autocaravana", icon: CarFront },
     { label: "Envie pedido de reserva", icon: CalendarCheck },

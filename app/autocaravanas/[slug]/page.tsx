@@ -2,12 +2,15 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { BookingRequestForm } from "@/components/BookingRequestForm";
-import { owners, vehicles } from "@/lib/sample-data";
+import { getVehicleBySlug } from "@/lib/data";
+import { owners } from "@/lib/sample-data";
 import { formatCurrency } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export default async function VehiclePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const vehicle = vehicles.find((item) => item.slug === slug);
+  const vehicle = await getVehicleBySlug(slug);
   if (!vehicle) notFound();
   const owner = owners.find((item) => item.id === vehicle.ownerId);
 
