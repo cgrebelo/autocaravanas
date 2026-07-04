@@ -18,7 +18,7 @@ export default function HomePage() {
         <div className="relative mx-auto flex min-h-[620px] max-w-7xl flex-col justify-center px-4 py-16 text-white">
           <div className="max-w-3xl">
             <h1 className="text-4xl font-bold leading-tight md:text-6xl">Alugue uma autocaravana e parta à descoberta</h1>
-            <p className="mt-5 max-w-2xl text-lg text-white/85">Frota própria, atendimento direto e reservas simples para viajar por Portugal com liberdade e confiança.</p>
+            <p className="mt-5 max-w-2xl text-lg text-white/85">Encontre autocaravanas de proprietários validados ou anuncie a sua e receba pedidos de reserva com gestão simples.</p>
           </div>
           <form className="mt-8 grid gap-3 rounded-lg bg-white p-4 text-road shadow-soft md:grid-cols-[1fr_1fr_1fr_auto]">
             <input type="date" className="rounded-md border border-stone-300 px-3 py-3" aria-label="Data de início" />
@@ -35,7 +35,7 @@ export default function HomePage() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold text-forest">Autocaravanas em destaque</h2>
-            <p className="mt-2 text-stone-600">Modelos equipados para escapadinhas, férias em família e grandes viagens.</p>
+          <p className="mt-2 text-stone-600">Modelos de proprietários validados para escapadinhas, férias em família e grandes viagens.</p>
           </div>
           <Link href="/autocaravanas" className="hidden font-semibold text-moss md:block">Ver frota</Link>
         </div>
@@ -63,7 +63,7 @@ export default function HomePage() {
         <div>
           <h2 className="text-3xl font-bold text-forest">Vantagens</h2>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {["Frota própria", "Atendimento direto", "Autocaravanas equipadas", "Possibilidade de extras", "Caução transparente", "Contrato claro"].map((item) => (
+            {["Proprietários validados", "Mensagens diretas", "Autocaravanas equipadas", "Possibilidade de extras", "Caução transparente", "Contrato claro"].map((item) => (
               <p key={item} className="flex items-center gap-2 rounded-md border border-stone-200 bg-white p-3"><BadgeCheck className="h-5 w-5 text-moss" />{item}</p>
             ))}
           </div>

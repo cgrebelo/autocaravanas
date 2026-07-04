@@ -1,5 +1,5 @@
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { bookings, documents, vehicles } from "@/lib/sample-data";
+import { bookings, documents, owners, users, vehicles } from "@/lib/sample-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function AdminPage() {
@@ -17,7 +17,9 @@ export default function AdminPage() {
             ["Receita recebida", formatCurrency(bookings[0].signalAmount)],
             ["Reservas pendentes", pending],
             ["Documentos por validar", documents.filter((d) => d.status === "pendente").length],
-            ["Veículos ativos", vehicles.length]
+            ["Veículos ativos", vehicles.filter((vehicle) => vehicle.status === "publicado").length],
+            ["Proprietários", owners.length],
+            ["Utilizadores", users.length]
           ].map(([label, value]) => <div key={label} className="rounded-lg bg-white p-4 shadow-soft"><p className="text-sm text-stone-500">{label}</p><p className="mt-2 text-2xl font-bold text-forest">{value}</p></div>)}
         </div>
         <div className="mt-8 rounded-lg border border-stone-200 bg-white p-5">

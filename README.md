@@ -1,6 +1,6 @@
 # Rota Livre Autocaravanas
 
-Aplicação web MVP para aluguer direto de uma frota própria de autocaravanas. A interface está em português de Portugal e foi criada sem copiar marca, textos, design, logótipo ou estrutura visual proprietária de terceiros.
+Aplicação web MVP para aluguer de autocaravanas em modelo marketplace: clientes reservam, proprietários anunciam as suas autocaravanas e uma conta de administrador valida e gere a plataforma. A interface está em português de Portugal e foi criada sem copiar marca, textos, design, logótipo ou estrutura visual proprietária de terceiros.
 
 ## Stack
 
@@ -51,7 +51,9 @@ O esquema inclui tabelas para `profiles`, `vehicles`, imagens, equipamentos, cam
 - Calendário de disponibilidade com bloqueios
 - Pedido de reserva com cálculo automático de preço
 - Área do cliente com reservas, documentos e mensagens
+- Área do proprietário com veículos, pedidos de reserva e estado de pagamentos
 - Painel admin para veículos, reservas, calendário, documentos, pagamentos e configurações
+- Painel admin para validar proprietários, gerir utilizadores e publicar/arquivar anúncios
 - Validação Zod nas APIs
 - Estrutura preparada para Supabase, Stripe, emails e uploads protegidos
 
@@ -66,7 +68,11 @@ O esquema inclui tabelas para `profiles`, `vehicles`, imagens, equipamentos, cam
 - `/cliente/reservas`
 - `/cliente/documentos`
 - `/cliente/mensagens`
+- `/proprietario`
+- `/proprietario/veiculos`
+- `/proprietario/reservas`
 - `/admin`
+- `/admin/utilizadores`
 - `/admin/veiculos`
 - `/admin/reservas`
 - `/admin/calendario`
@@ -82,6 +88,20 @@ O esquema inclui tabelas para `profiles`, `vehicles`, imagens, equipamentos, cam
 - `POST /api/documents`
 - `POST /api/messages`
 - `POST /api/payments/checkout`
+- `POST /api/auth/register`
+- `POST /api/vehicles`
+
+## Conta de administrador
+
+No Supabase Auth, crie manualmente um utilizador administrador e depois atualize o perfil:
+
+```sql
+update profiles
+set role = 'administrador', status = 'ativo'
+where id = '<uuid-do-utilizador-admin>';
+```
+
+As contas de proprietário devem começar como `pendente`; o administrador valida o perfil de proprietário e publica os anúncios.
 
 ## Dados de exemplo
 

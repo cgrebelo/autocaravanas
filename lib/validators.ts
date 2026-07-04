@@ -27,3 +27,27 @@ export const statusSchema = z.object({
   status: z.string().min(1),
   note: z.string().optional()
 });
+
+export const registerSchema = z.object({
+  fullName: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  password: z.string().min(8),
+  role: z.enum(["cliente", "proprietario"]),
+  ownerDisplayName: z.string().optional()
+}).refine((data) => data.role === "cliente" || Boolean(data.ownerDisplayName?.trim()), {
+  path: ["ownerDisplayName"],
+  message: "Indique o nome público do proprietário."
+});
+
+export const vehicleCreateSchema = z.object({
+  ownerId: z.string().min(1),
+  name: z.string().min(2),
+  type: z.enum(["autocaravana", "campervan", "perfilada", "capucine", "integral"]),
+  location: z.string().min(2),
+  privateAddress: z.string().min(2),
+  priceFrom: z.coerce.number().min(1),
+  seats: z.coerce.number().min(1),
+  sleeps: z.coerce.number().min(1),
+  description: z.string().min(20)
+});

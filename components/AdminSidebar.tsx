@@ -3,6 +3,7 @@ import { CalendarDays, CreditCard, FileCheck, Home, MessageSquare, Settings, Tru
 
 const items = [
   { href: "/admin", label: "Dashboard", icon: Home },
+  { href: "/admin/utilizadores", label: "Utilizadores", icon: Users },
   { href: "/admin/veiculos", label: "Veículos", icon: Truck },
   { href: "/admin/reservas", label: "Reservas", icon: Users },
   { href: "/admin/calendario", label: "Calendário", icon: CalendarDays },

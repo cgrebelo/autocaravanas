@@ -3,8 +3,11 @@ import Link from "next/link";
 import { MapPin, Star, Users } from "lucide-react";
 import { Vehicle } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+import { owners } from "@/lib/sample-data";
 
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+  const owner = owners.find((item) => item.id === vehicle.ownerId);
+
   return (
     <Link href={`/autocaravanas/${vehicle.slug}`} className="group block overflow-hidden rounded-lg border border-stone-200 bg-white shadow-soft transition hover:-translate-y-1">
       <div className="relative aspect-[4/3]">
@@ -18,6 +21,7 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
               <MapPin className="h-4 w-4" />
               {vehicle.location}
             </p>
+            {owner && <p className="mt-1 text-xs font-medium text-moss">{owner.displayName}</p>}
           </div>
           <span className="flex items-center gap-1 rounded-full bg-sand px-2 py-1 text-sm font-medium text-road">
             <Star className="h-4 w-4 fill-clay text-clay" />

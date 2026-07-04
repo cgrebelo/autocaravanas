@@ -1,8 +1,14 @@
-insert into vehicles (slug, name, type, description, public_location, private_address, license_plate, price_from, seats, sleeps, gearbox, pets_allowed, included_km_per_day, deposit_amount, extra_km_price, fuel_policy, cleaning_policy, abroad_allowed)
+insert into owner_profiles (display_name, fiscal_name, public_location, payout_status, verified)
 values
-('serra-atlantica', 'Serra Atlântica', 'perfilada', 'Autocaravana confortável para viagens em família.', 'Sintra, Lisboa', 'Rua da Serra 12, Sintra', 'AA-00-AA', 92, 4, 4, 'Manual', true, 250, 1200, 0.28, 'Cheio-cheio', 'Devolver limpa', true),
-('costa-vicentina', 'Costa Vicentina', 'campervan', 'Campervan ágil para duas pessoas.', 'Lagos, Algarve', 'Estrada da Meia Praia 8, Lagos', 'BB-00-BB', 74, 2, 2, 'Automática', false, 220, 900, 0.24, 'Cheio-cheio', 'Interior limpo', true),
-('douro-livre', 'Douro Livre', 'capucine', 'Autocaravana espaçosa para grupos e famílias.', 'Vila Nova de Gaia, Porto', 'Rua do Rio 31, Vila Nova de Gaia', 'CC-00-CC', 108, 6, 6, 'Manual', true, 300, 1400, 0.30, 'Cheio-cheio', 'Taxa de limpeza se necessário', false);
+('Ana Martins Campers', 'Ana Martins', 'Sintra, Lisboa', 'ativo', true),
+('Costa Vicentina Vans', 'João Pereira', 'Lagos, Algarve', 'ativo', true),
+('Douro Campers', 'Douro Campers Lda', 'Vila Nova de Gaia, Porto', 'pendente', false);
+
+insert into vehicles (owner_id, slug, name, type, description, public_location, private_address, license_plate, price_from, seats, sleeps, gearbox, pets_allowed, included_km_per_day, deposit_amount, extra_km_price, fuel_policy, cleaning_policy, abroad_allowed, status)
+values
+((select id from owner_profiles where display_name = 'Ana Martins Campers'), 'serra-atlantica', 'Serra Atlântica', 'perfilada', 'Autocaravana confortável para viagens em família.', 'Sintra, Lisboa', 'Rua da Serra 12, Sintra', 'AA-00-AA', 92, 4, 4, 'Manual', true, 250, 1200, 0.28, 'Cheio-cheio', 'Devolver limpa', true, 'publicado'),
+((select id from owner_profiles where display_name = 'Costa Vicentina Vans'), 'costa-vicentina', 'Costa Vicentina', 'campervan', 'Campervan ágil para duas pessoas.', 'Lagos, Algarve', 'Estrada da Meia Praia 8, Lagos', 'BB-00-BB', 74, 2, 2, 'Automática', false, 220, 900, 0.24, 'Cheio-cheio', 'Interior limpo', true, 'publicado'),
+((select id from owner_profiles where display_name = 'Douro Campers'), 'douro-livre', 'Douro Livre', 'capucine', 'Autocaravana espaçosa para grupos e famílias.', 'Vila Nova de Gaia, Porto', 'Rua do Rio 31, Vila Nova de Gaia', 'CC-00-CC', 108, 6, 6, 'Manual', true, 300, 1400, 0.30, 'Cheio-cheio', 'Taxa de limpeza se necessário', false, 'pendente');
 
 insert into vehicle_features (vehicle_id, name)
 select id, feature

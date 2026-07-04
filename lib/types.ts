@@ -1,4 +1,5 @@
 export type VehicleType = "autocaravana" | "campervan" | "perfilada" | "capucine" | "integral";
+export type UserRole = "cliente" | "proprietario" | "administrador";
 export type BookingStatus =
   | "Pedido enviado"
   | "A aguardar aprovação"
@@ -14,6 +15,7 @@ export type BookingStatus =
 
 export type Vehicle = {
   id: string;
+  ownerId: string;
   slug: string;
   name: string;
   type: VehicleType;
@@ -46,6 +48,7 @@ export type Vehicle = {
   unavailable: { start: string; end: string; reason: string }[];
   createdAt: string;
   popularity: number;
+  status: "rascunho" | "pendente" | "publicado" | "arquivado";
 };
 
 export type Booking = {
@@ -62,6 +65,27 @@ export type Booking = {
   signalAmount: number;
   extras: string[];
   message?: string;
+};
+
+export type UserAccount = {
+  id: string;
+  role: UserRole;
+  fullName: string;
+  email: string;
+  phone?: string;
+  status: "ativo" | "pendente" | "suspenso";
+  createdAt: string;
+};
+
+export type OwnerProfile = {
+  id: string;
+  userId: string;
+  displayName: string;
+  fiscalName: string;
+  location: string;
+  rating: number;
+  verified: boolean;
+  payoutStatus: "por_configurar" | "pendente" | "ativo";
 };
 
 export type DocumentItem = {

@@ -2,12 +2,14 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { BookingRequestForm } from "@/components/BookingRequestForm";
-import { vehicles } from "@/lib/sample-data";
+import { owners, vehicles } from "@/lib/sample-data";
 import { formatCurrency } from "@/lib/utils";
 
-export default function VehiclePage({ params }: { params: { slug: string } }) {
-  const vehicle = vehicles.find((item) => item.slug === params.slug);
+export default async function VehiclePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const vehicle = vehicles.find((item) => item.slug === slug);
   if (!vehicle) notFound();
+  const owner = owners.find((item) => item.id === vehicle.ownerId);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10">
@@ -29,6 +31,7 @@ export default function VehiclePage({ params }: { params: { slug: string } }) {
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-clay">{vehicle.location}</p>
             <h1 className="mt-2 text-4xl font-bold text-forest">{vehicle.name}</h1>
+            {owner && <p className="mt-2 text-sm font-semibold text-moss">Anunciada por {owner.displayName}{owner.verified ? " · Proprietário validado" : " · A aguardar validação"}</p>}
             <p className="mt-3 text-xl font-semibold text-road">{formatCurrency(vehicle.priceFrom)} <span className="text-sm font-normal text-stone-500">preço por dia desde</span></p>
             <p className="mt-4 text-stone-700">{vehicle.description}</p>
           </div>

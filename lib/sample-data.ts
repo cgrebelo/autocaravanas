@@ -1,8 +1,24 @@
-import { Booking, DocumentItem, Message, Vehicle } from "./types";
+import { Booking, DocumentItem, Message, OwnerProfile, UserAccount, Vehicle } from "./types";
+
+export const users: UserAccount[] = [
+  { id: "u-admin", role: "administrador", fullName: "Administrador Rota Livre", email: "admin@rotalivre.pt", phone: "+351 900 000 001", status: "ativo", createdAt: "2026-04-01" },
+  { id: "u-owner-1", role: "proprietario", fullName: "Ana Martins", email: "ana.proprietaria@example.com", phone: "+351 910 000 001", status: "ativo", createdAt: "2026-04-12" },
+  { id: "u-owner-2", role: "proprietario", fullName: "João Pereira", email: "joao.proprietario@example.com", phone: "+351 920 000 002", status: "ativo", createdAt: "2026-05-04" },
+  { id: "u-owner-3", role: "proprietario", fullName: "Douro Campers Lda", email: "douro@example.com", phone: "+351 930 000 003", status: "pendente", createdAt: "2026-06-10" },
+  { id: "u-client-1", role: "cliente", fullName: "Inês Ferreira", email: "ines@example.com", phone: "+351 940 000 004", status: "ativo", createdAt: "2026-06-18" },
+  { id: "u-client-2", role: "cliente", fullName: "Miguel Ramos", email: "miguel@example.com", phone: "+351 950 000 005", status: "ativo", createdAt: "2026-06-24" }
+];
+
+export const owners: OwnerProfile[] = [
+  { id: "o1", userId: "u-owner-1", displayName: "Ana Martins Campers", fiscalName: "Ana Martins", location: "Sintra, Lisboa", rating: 4.8, verified: true, payoutStatus: "ativo" },
+  { id: "o2", userId: "u-owner-2", displayName: "Costa Vicentina Vans", fiscalName: "João Pereira", location: "Lagos, Algarve", rating: 4.7, verified: true, payoutStatus: "ativo" },
+  { id: "o3", userId: "u-owner-3", displayName: "Douro Campers", fiscalName: "Douro Campers Lda", location: "Vila Nova de Gaia, Porto", rating: 4.9, verified: false, payoutStatus: "pendente" }
+];
 
 export const vehicles: Vehicle[] = [
   {
     id: "v1",
+    ownerId: "o1",
     slug: "serra-atlantica",
     name: "Serra Atlântica",
     type: "perfilada",
@@ -62,10 +78,12 @@ export const vehicles: Vehicle[] = [
       { start: "2026-08-02", end: "2026-08-05", reason: "Manutenção" }
     ],
     createdAt: "2026-05-18",
-    popularity: 96
+    popularity: 96,
+    status: "publicado"
   },
   {
     id: "v2",
+    ownerId: "o2",
     slug: "costa-vicentina",
     name: "Costa Vicentina",
     type: "campervan",
@@ -116,10 +134,12 @@ export const vehicles: Vehicle[] = [
     ],
     unavailable: [{ start: "2026-07-20", end: "2026-07-24", reason: "Uso próprio" }],
     createdAt: "2026-06-02",
-    popularity: 88
+    popularity: 88,
+    status: "publicado"
   },
   {
     id: "v3",
+    ownerId: "o3",
     slug: "douro-livre",
     name: "Douro Livre",
     type: "capucine",
@@ -174,7 +194,8 @@ export const vehicles: Vehicle[] = [
     ],
     unavailable: [{ start: "2026-09-01", end: "2026-09-08", reason: "Reserva confirmada" }],
     createdAt: "2026-04-11",
-    popularity: 91
+    popularity: 91,
+    status: "pendente"
   }
 ];
 

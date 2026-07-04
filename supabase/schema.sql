@@ -1,7 +1,7 @@
 create extension if not exists "uuid-ossp";
 create extension if not exists "btree_gist";
 
-create type user_role as enum ('cliente', 'administrador');
+create type user_role as enum ('cliente', 'proprietario', 'administrador');
 create type booking_status as enum ('Pedido enviado', 'A aguardar aprovação', 'Aprovada', 'A aguardar pagamento', 'Confirmada', 'Documentos pendentes', 'Documentos validados', 'Em curso', 'Concluída', 'Cancelada', 'Recusada');
 create type document_status as enum ('pendente', 'validado', 'recusado');
 create type payment_status as enum ('pendente', 'pago', 'falhado', 'reembolsado');
@@ -19,11 +19,25 @@ create table profiles (
   full_name text not null,
   phone text,
   address text,
+  status text not null default 'ativo' check (status in ('ativo', 'pendente', 'suspenso')),
+  created_at timestamptz not null default now()
+);
+
+create table owner_profiles (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid unique references profiles(id) on delete cascade,
+  display_name text not null,
+  fiscal_name text,
+  tax_number text,
+  public_location text,
+  payout_status text not null default 'por_configurar' check (payout_status in ('por_configurar', 'pendente', 'ativo')),
+  verified boolean not null default false,
   created_at timestamptz not null default now()
 );
 
 create table vehicles (
   id uuid primary key default uuid_generate_v4(),
+  owner_id uuid references owner_profiles(id) on delete set null,
   slug text unique not null,
   name text not null,
   type text not null,
@@ -45,6 +59,7 @@ create table vehicles (
   abroad_allowed boolean not null default false,
   min_driver_age int not null default 25,
   min_license_years int not null default 3,
+  status text not null default 'pendente' check (status in ('rascunho', 'pendente', 'publicado', 'arquivado')),
   archived_at timestamptz,
   created_at timestamptz not null default now()
 );
@@ -260,8 +275,24 @@ returns boolean language sql stable as $$
   select exists (select 1 from profiles where id = auth.uid() and role = 'administrador');
 $$;
 
+create or replace function is_owner()
+returns boolean language sql stable as $$
+  select exists (select 1 from profiles where id = auth.uid() and role = 'proprietario' and status = 'ativo');
+$$;
+
+create or replace function owns_vehicle(vehicle uuid)
+returns boolean language sql stable as $$
+  select exists (
+    select 1
+    from vehicles v
+    join owner_profiles o on o.id = v.owner_id
+    where v.id = vehicle and o.user_id = auth.uid()
+  );
+$$;
+
 alter table profiles enable row level security;
 alter table users enable row level security;
+alter table owner_profiles enable row level security;
 alter table vehicles enable row level security;
 alter table vehicle_images enable row level security;
 alter table vehicle_features enable row level security;
@@ -282,8 +313,13 @@ alter table handover_photos enable row level security;
 alter table admin_notes enable row level security;
 alter table settings enable row level security;
 
-create policy "public can read active vehicles" on vehicles for select using (archived_at is null);
+create policy "public can read active vehicles" on vehicles for select using (archived_at is null and status = 'publicado');
 create policy "admins manage vehicles" on vehicles for all using (is_admin()) with check (is_admin());
+create policy "owners read own vehicles" on vehicles for select using (owns_vehicle(id));
+create policy "owners create vehicles" on vehicles for insert with check (
+  is_owner() and exists (select 1 from owner_profiles o where o.id = owner_id and o.user_id = auth.uid())
+);
+create policy "owners update own draft vehicles" on vehicles for update using (owns_vehicle(id)) with check (owns_vehicle(id) and status in ('rascunho', 'pendente'));
 create policy "public can read vehicle public data" on vehicle_images for select using (true);
 create policy "public can read features" on vehicle_features for select using (true);
 create policy "public can read beds" on vehicle_beds for select using (true);
@@ -297,16 +333,21 @@ create policy "users update own profile" on profiles for update using (id = auth
 create policy "admins manage profiles" on profiles for all using (is_admin()) with check (is_admin());
 create policy "users read own user row" on users for select using (id = auth.uid() or is_admin());
 create policy "admins manage users" on users for all using (is_admin()) with check (is_admin());
+create policy "owners read public owner profiles" on owner_profiles for select using (verified or user_id = auth.uid() or is_admin());
+create policy "owners create own owner profile" on owner_profiles for insert with check (user_id = auth.uid());
+create policy "owners update own owner profile" on owner_profiles for update using (user_id = auth.uid()) with check (user_id = auth.uid() and verified = false);
+create policy "admins manage owner profiles" on owner_profiles for all using (is_admin()) with check (is_admin());
 
-create policy "customers read own bookings" on bookings for select using (customer_id = auth.uid() or is_admin());
+create policy "customers read own bookings" on bookings for select using (customer_id = auth.uid() or is_admin() or owns_vehicle(vehicle_id));
 create policy "customers create bookings" on bookings for insert with check (customer_id = auth.uid());
 create policy "admins manage bookings" on bookings for all using (is_admin()) with check (is_admin());
+create policy "owners update bookings for own vehicles" on bookings for update using (owns_vehicle(vehicle_id)) with check (owns_vehicle(vehicle_id));
 
 create policy "booking participants read messages" on booking_messages for select using (
-  is_admin() or exists (select 1 from bookings b where b.id = booking_id and b.customer_id = auth.uid())
+  is_admin() or exists (select 1 from bookings b where b.id = booking_id and (b.customer_id = auth.uid() or owns_vehicle(b.vehicle_id)))
 );
 create policy "booking participants send messages" on booking_messages for insert with check (
-  is_admin() or exists (select 1 from bookings b where b.id = booking_id and b.customer_id = auth.uid())
+  is_admin() or exists (select 1 from bookings b where b.id = booking_id and (b.customer_id = auth.uid() or owns_vehicle(b.vehicle_id)))
 );
 
 create policy "customers read own documents" on booking_documents for select using (profile_id = auth.uid() or is_admin());
@@ -314,7 +355,7 @@ create policy "customers upload own documents" on booking_documents for insert w
 create policy "admins manage documents" on booking_documents for all using (is_admin()) with check (is_admin());
 
 create policy "booking participants read payments" on payments for select using (
-  is_admin() or exists (select 1 from bookings b where b.id = booking_id and b.customer_id = auth.uid())
+  is_admin() or exists (select 1 from bookings b where b.id = booking_id and (b.customer_id = auth.uid() or owns_vehicle(b.vehicle_id)))
 );
 create policy "admins manage payments" on payments for all using (is_admin()) with check (is_admin());
 create policy "admins manage settings" on settings for all using (is_admin()) with check (is_admin());
