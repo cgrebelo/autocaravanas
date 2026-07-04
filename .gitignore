@@ -1,8 +1,10 @@
 .next
+.open-next
 node_modules
 .env
 .env.local
 dist
 coverage
+work
 *.log
 *.tsbuildinfo
