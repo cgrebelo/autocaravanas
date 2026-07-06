@@ -1,6 +1,5 @@
 import { createServerClient } from "./supabase-server";
-import { bookings as sampleBookings, owners as sampleOwners, users as sampleUsers, vehicles as sampleVehicles } from "./sample-data";
-import { Booking, OwnerProfile, UserAccount, Vehicle } from "./types";
+import { Booking, DocumentItem, Message, OwnerProfile, UserAccount, Vehicle } from "./types";
 
 type VehicleRow = {
   id: string;
@@ -31,7 +30,7 @@ type VehicleRow = {
 
 export async function getPublicVehicles(): Promise<Vehicle[]> {
   const supabase = createServerClient();
-  if (!supabase) return sampleVehicles;
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from("vehicles")
@@ -50,7 +49,7 @@ export async function getPublicVehicles(): Promise<Vehicle[]> {
 
 export async function getVehicleBySlug(slug: string) {
   const supabase = createServerClient();
-  if (!supabase) return sampleVehicles.find((vehicle) => vehicle.slug === slug) ?? null;
+  if (!supabase) return null;
 
   const { data, error } = await supabase.from("vehicles").select("*").eq("slug", slug).single();
   if (error || !data) return null;
@@ -59,9 +58,9 @@ export async function getVehicleBySlug(slug: string) {
 
 export async function getAdminUsers(): Promise<UserAccount[]> {
   const supabase = createServerClient();
-  if (!supabase) return sampleUsers;
+  if (!supabase) return [];
 
-  const { data, error } = await supabase.from("profiles").select("id, role, full_name, phone, status, created_at, users(email)").order("created_at", { ascending: false });
+  const { data, error } = await supabase.from("profiles").select("id, role, full_name, phone, status, created_at, users(email, username)").order("created_at", { ascending: false });
   if (error || !data) return [];
 
   return data.map((row) => {
@@ -82,7 +81,7 @@ export async function getAdminUsers(): Promise<UserAccount[]> {
 
 export async function getOwnerProfiles(): Promise<OwnerProfile[]> {
   const supabase = createServerClient();
-  if (!supabase) return sampleOwners;
+  if (!supabase) return [];
 
   const { data, error } = await supabase.from("owner_profiles").select("*").order("created_at", { ascending: false });
   if (error || !data) return [];
@@ -101,7 +100,7 @@ export async function getOwnerProfiles(): Promise<OwnerProfile[]> {
 
 export async function getAdminVehicles(): Promise<Vehicle[]> {
   const supabase = createServerClient();
-  if (!supabase) return sampleVehicles;
+  if (!supabase) return [];
 
   const { data, error } = await supabase.from("vehicles").select("*").order("created_at", { ascending: false });
   if (error || !data) return [];
@@ -110,7 +109,7 @@ export async function getAdminVehicles(): Promise<Vehicle[]> {
 
 export async function getBookings(): Promise<Booking[]> {
   const supabase = createServerClient();
-  if (!supabase) return sampleBookings;
+  if (!supabase) return [];
 
   const { data, error } = await supabase.from("bookings").select("*").order("created_at", { ascending: false });
   if (error || !data) return [];
@@ -129,6 +128,38 @@ export async function getBookings(): Promise<Booking[]> {
     signalAmount: Number(row.signal_amount),
     extras: [],
     message: row.message ?? undefined
+  }));
+}
+
+export async function getDocuments(): Promise<DocumentItem[]> {
+  const supabase = createServerClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.from("booking_documents").select("id, booking_id, document_type, status, rejection_reason").order("created_at", { ascending: false });
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    bookingId: row.booking_id,
+    name: row.document_type,
+    status: row.status,
+    rejectionReason: row.rejection_reason ?? undefined
+  }));
+}
+
+export async function getMessages(): Promise<Message[]> {
+  const supabase = createServerClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.from("booking_messages").select("id, booking_id, sender_role, body, created_at").order("created_at", { ascending: true });
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    bookingId: row.booking_id,
+    sender: row.sender_role === "administrador" ? "administrador" : "cliente",
+    body: row.body,
+    createdAt: row.created_at
   }));
 }
 

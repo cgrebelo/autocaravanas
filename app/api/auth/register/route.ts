@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: profileError.message }, { status: 400 });
   }
 
-  await supabase.from("users").insert({ id: userId, email: parsed.data.email });
+  await supabase.from("users").insert({ id: userId, email: parsed.data.email, username: parsed.data.username ?? null });
 
   if (parsed.data.role === "proprietario") {
     const { error: ownerError } = await supabase.from("owner_profiles").insert({

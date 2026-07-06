@@ -29,6 +29,7 @@ export function RegisterForm() {
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <label className="block text-sm font-medium text-road">Nome completo<input name="fullName" required className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
         <label className="block text-sm font-medium text-road">Email<input name="email" type="email" required className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
+        <label className="block text-sm font-medium text-road">Username<input name="username" className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" placeholder="Opcional" /></label>
         <label className="block text-sm font-medium text-road">Telefone<input name="phone" className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
         <label className="block text-sm font-medium text-road">Palavra-passe<input name="password" type="password" required minLength={8} className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
         <label className="block text-sm font-medium text-road md:col-span-2">

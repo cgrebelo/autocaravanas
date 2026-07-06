@@ -1,8 +1,12 @@
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { bookings, documents, owners, users, vehicles } from "@/lib/sample-data";
+import { documents } from "@/lib/sample-data";
+import { getAdminUsers, getAdminVehicles, getBookings, getOwnerProfiles } from "@/lib/data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export default function AdminPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
+  const [bookings, owners, users, vehicles] = await Promise.all([getBookings(), getOwnerProfiles(), getAdminUsers(), getAdminVehicles()]);
   const pending = bookings.filter((booking) => booking.status.includes("aguardar")).length;
   const revenue = bookings.reduce((sum, booking) => sum + booking.total, 0);
   return (
@@ -14,7 +18,7 @@ export default function AdminPage() {
           {[
             ["Reservas este mês", bookings.length],
             ["Receita prevista", formatCurrency(revenue)],
-            ["Receita recebida", formatCurrency(bookings[0].signalAmount)],
+            ["Receita recebida", formatCurrency(bookings[0]?.signalAmount ?? 0)],
             ["Reservas pendentes", pending],
             ["Documentos por validar", documents.filter((d) => d.status === "pendente").length],
             ["Veículos ativos", vehicles.filter((vehicle) => vehicle.status === "publicado").length],

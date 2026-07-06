@@ -4,8 +4,9 @@ import crypto from "node:crypto";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const email = process.env.ADMIN_EMAIL ?? "admin@rotalivre.pt";
+const username = process.env.ADMIN_USERNAME ?? "admin";
 const fullName = process.env.ADMIN_NAME ?? "Administrador";
-const password = process.env.ADMIN_PASSWORD ?? crypto.randomBytes(18).toString("base64url");
+const password = process.env.ADMIN_PASSWORD ?? "adm123";
 
 if (!url || !serviceRoleKey) {
   console.error("Faltam NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.");
@@ -63,8 +64,9 @@ if (profileError) {
   process.exit(1);
 }
 
-await supabase.from("users").upsert({ id: user.id, email });
+await supabase.from("users").upsert({ id: user.id, email, username });
 
 console.log("Conta admin pronta:");
+console.log(`Username: ${username}`);
 console.log(`Email: ${email}`);
 console.log(`Password: ${password}`);

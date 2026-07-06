@@ -15,12 +15,25 @@ export function LoginForm() {
     const formData = new FormData(event.currentTarget);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: String(formData.get("email")),
-        password: String(formData.get("password"))
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          identifier: formData.get("identifier"),
+          password: formData.get("password")
+        })
       });
-      setMessage(error ? error.message : "Sessão iniciada. Já pode reservar ou gerir a sua conta.");
+      const result = await response.json();
+      if (!response.ok) {
+        setMessage(result.error ?? "Login inválido.");
+        return;
+      }
+      const supabase = createClient();
+      await supabase.auth.setSession({
+        access_token: result.session.access_token,
+        refresh_token: result.session.refresh_token
+      });
+      setMessage("Sessão iniciada. Já pode reservar ou gerir a sua conta.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível iniciar sessão.");
     } finally {
@@ -31,7 +44,7 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="w-full rounded-lg border border-stone-200 bg-white p-6 shadow-soft">
       <h1 className="text-2xl font-bold text-forest">Iniciar sessão</h1>
-      <label className="mt-5 block text-sm font-medium text-road">Email<input name="email" type="email" required className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
+      <label className="mt-5 block text-sm font-medium text-road">Username ou email<input name="identifier" required className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
       <label className="mt-4 block text-sm font-medium text-road">Palavra-passe<input name="password" type="password" required className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2" /></label>
       <button disabled={loading} className="mt-6 w-full rounded-md bg-forest px-4 py-3 font-semibold text-white disabled:bg-stone-300">{loading ? "A entrar..." : "Entrar"}</button>
       {message && <p className="mt-4 rounded-md bg-sand p-3 text-sm text-road">{message}</p>}

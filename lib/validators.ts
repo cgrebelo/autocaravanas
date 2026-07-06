@@ -31,6 +31,7 @@ export const statusSchema = z.object({
 export const registerSchema = z.object({
   fullName: z.string().min(2),
   email: z.string().email(),
+  username: z.string().min(3).max(32).regex(/^[a-z0-9._-]+$/).optional(),
   phone: z.string().optional(),
   password: z.string().min(8),
   role: z.enum(["cliente", "proprietario"]),
@@ -38,6 +39,11 @@ export const registerSchema = z.object({
 }).refine((data) => data.role === "cliente" || Boolean(data.ownerDisplayName?.trim()), {
   path: ["ownerDisplayName"],
   message: "Indique o nome público do proprietário."
+});
+
+export const loginSchema = z.object({
+  identifier: z.string().min(3),
+  password: z.string().min(1)
 });
 
 export const vehicleCreateSchema = z.object({

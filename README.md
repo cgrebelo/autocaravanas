@@ -104,10 +104,10 @@ O esquema inclui tabelas para `profiles`, `vehicles`, imagens, equipamentos, cam
 Depois de configurar `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`, crie a primeira conta admin:
 
 ```bash
-ADMIN_EMAIL=admin@rotalivre.pt ADMIN_NAME="Administrador" pnpm create-admin
+ADMIN_EMAIL=admin@rotalivre.pt ADMIN_USERNAME=admin ADMIN_PASSWORD=adm123 ADMIN_NAME="Administrador" pnpm create-admin
 ```
 
-O script imprime a password gerada. Guarde-a num gestor de passwords.
+O script cria a conta no Supabase Auth e grava o perfil `administrador` na base de dados.
 
 Também pode definir uma password manual:
 

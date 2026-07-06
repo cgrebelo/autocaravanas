@@ -10,6 +10,7 @@ create type deposit_status as enum ('pendente', 'recebida', 'devolvida', 'retida
 create table users (
   id uuid primary key references auth.users(id) on delete cascade,
   email text unique not null,
+  username text unique,
   created_at timestamptz not null default now()
 );
 
