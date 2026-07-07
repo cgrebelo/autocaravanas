@@ -23,9 +23,19 @@ export function LoginForm() {
           password: formData.get("password")
         })
       });
-      const result = await response.json();
+      const responseText = await response.text();
+      let result: { error?: string; session?: { access_token?: string; refresh_token?: string } };
+      try {
+        result = responseText ? JSON.parse(responseText) : { error: "O servidor não devolveu resposta." };
+      } catch {
+        result = { error: "O servidor devolveu uma resposta inválida. Confirme o deploy e as variáveis do Supabase." };
+      }
       if (!response.ok) {
         setMessage(result.error ?? "Login inválido.");
+        return;
+      }
+      if (!result.session?.access_token || !result.session?.refresh_token) {
+        setMessage("Login incompleto. Confirme a configuração do Supabase.");
         return;
       }
       const supabase = createClient();
