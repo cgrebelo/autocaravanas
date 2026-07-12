@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
-import { createServerClient, getAuthenticatedUser } from "@/lib/supabase-server";
+import { createAuthenticatedServerClient, getAuthenticatedUser, getBearerToken } from "@/lib/supabase-server";
 
 export async function GET(request: Request) {
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ user: null });
 
-  const supabase = createServerClient();
+  const token = getBearerToken(request);
+  if (!token) return NextResponse.json({ user: null });
+
+  const supabase = createAuthenticatedServerClient(token);
   if (!supabase) return NextResponse.json({ user: null });
 
   const [{ data: profile }, { data: userRow }] = await Promise.all([
