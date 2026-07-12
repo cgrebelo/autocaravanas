@@ -5,18 +5,20 @@ import { LogOut, Menu, X } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
+import type { UserRole } from "@/lib/types";
 
 const navLinks = [
-  { href: "/autocaravanas", label: "Autocaravanas" },
-  { href: "/cliente", label: "Área do cliente" },
-  { href: "/proprietario", label: "Proprietário" },
-  { href: "/admin", label: "Admin" }
+  { href: "/autocaravanas", label: "Autocaravanas", visibility: "public" },
+  { href: "/cliente", label: "Área do cliente", visibility: "authenticated" },
+  { href: "/proprietario", label: "Proprietário", visibility: "owner" },
+  { href: "/admin", label: "Admin", visibility: "admin" }
 ];
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,6 +50,7 @@ export function SiteHeader() {
 
     async function loadUsername() {
       setUsername(null);
+      setRole(null);
       if (!session?.user) return;
 
       try {
@@ -57,6 +60,14 @@ export function SiteHeader() {
       } catch {
         if (isMounted) setUsername(null);
       }
+
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
+        if (isMounted) setRole((data?.role as UserRole | undefined) ?? null);
+      } catch {
+        if (isMounted) setRole(null);
+      }
     }
 
     loadUsername();
@@ -65,6 +76,16 @@ export function SiteHeader() {
       isMounted = false;
     };
   }, [session]);
+
+  const visibleNavLinks = useMemo(() => {
+    return navLinks.filter((link) => {
+      if (link.visibility === "public") return true;
+      if (link.visibility === "authenticated") return Boolean(session);
+      if (link.visibility === "owner") return role === "proprietario" || role === "administrador";
+      if (link.visibility === "admin") return role === "administrador";
+      return false;
+    });
+  }, [role, session]);
 
   const displayName = useMemo(() => {
     if (!session?.user) return null;
@@ -83,6 +104,7 @@ export function SiteHeader() {
     } finally {
       setSession(null);
       setUsername(null);
+      setRole(null);
       setIsOpen(false);
     }
   }
@@ -95,7 +117,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-medium text-stone-700 md:flex">
-          {navLinks.map((link) => (
+          {visibleNavLinks.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-forest">
               {link.label}
             </Link>
@@ -139,7 +161,7 @@ export function SiteHeader() {
       {isOpen ? (
         <nav className="border-t border-stone-200 bg-white px-4 py-3 shadow-sm md:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 text-sm font-medium text-stone-700">
-            {navLinks.map((link) => (
+            {visibleNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
