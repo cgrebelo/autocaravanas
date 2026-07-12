@@ -31,7 +31,7 @@ export const statusSchema = z.object({
 export const registerSchema = z.object({
   fullName: z.string().min(2),
   email: z.string().email(),
-  username: z.string().min(3).max(32).regex(/^[a-z0-9._-]+$/).optional(),
+  username: z.string().min(3).max(32).regex(/^[a-z0-9._-]+$/).optional().or(z.literal("")),
   phone: z.string().optional(),
   password: z.string().min(8),
   role: z.enum(["cliente", "proprietario"]),
