@@ -17,6 +17,7 @@ export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [fullName, setFullName] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
@@ -47,29 +48,39 @@ export function SiteHeader() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadUsername() {
+    async function loadUserMenu() {
       setUsername(null);
+      setFullName(null);
       setRole(null);
       if (!session?.user) return;
 
       try {
         const supabase = createClient();
-        const { data } = await supabase.from("users").select("username").eq("id", session.user.id).maybeSingle();
-        if (isMounted) setUsername(data?.username ?? null);
-      } catch {
-        if (isMounted) setUsername(null);
-      }
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        if (!token) return;
 
-      try {
-        const supabase = createClient();
-        const { data } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
-        if (isMounted) setRole((data?.role as UserRole | undefined) ?? null);
+        const response = await fetch("/api/auth/me", {
+          headers: { authorization: `Bearer ${token}` },
+          cache: "no-store"
+        });
+        const result = await response.json();
+
+        if (isMounted) {
+          setUsername(result.user?.username ?? null);
+          setFullName(result.user?.fullName ?? null);
+          setRole((result.user?.role as UserRole | undefined) ?? null);
+        }
       } catch {
-        if (isMounted) setRole(null);
+        if (isMounted) {
+          setUsername(null);
+          setFullName(null);
+          setRole(null);
+        }
       }
     }
 
-    loadUsername();
+    loadUserMenu();
 
     return () => {
       isMounted = false;
@@ -89,11 +100,12 @@ export function SiteHeader() {
     if (!session?.user) return null;
     return (
       username ||
+      fullName ||
       session.user.user_metadata?.full_name ||
       session.user.email?.split("@")[0] ||
       "Utilizador"
     );
-  }, [session, username]);
+  }, [fullName, session, username]);
 
   async function handleLogout() {
     try {
@@ -102,6 +114,7 @@ export function SiteHeader() {
     } finally {
       setSession(null);
       setUsername(null);
+      setFullName(null);
       setRole(null);
       setIsOpen(false);
     }
