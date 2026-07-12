@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient, createServerClient } from "@/lib/supabase-server";
+import { createServerClient } from "@/lib/supabase-server";
 import { loginSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
@@ -16,10 +16,7 @@ export async function POST(request: Request) {
       if (identifier === adminUsername) {
         email = adminEmail;
       } else {
-        const admin = createAdminClient();
-        const { data, error } = await admin.from("users").select("email").eq("username", identifier).single();
-        if (error || !data?.email) return NextResponse.json({ error: "Utilizador não encontrado." }, { status: 404 });
-        email = data.email;
+        return NextResponse.json({ error: "Use o email para iniciar sessão." }, { status: 400 });
       }
     }
 
