@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { CalendarDays, Home, Inbox, PlusCircle, Truck } from "lucide-react";
+import { Home, Inbox, PlusCircle, Truck } from "lucide-react";
 
 const items = [
   { href: "/proprietario", label: "Dashboard", icon: Home },
   { href: "/proprietario/veiculos", label: "As minhas autocaravanas", icon: Truck },
-  { href: "/proprietario/reservas", label: "Pedidos de reserva", icon: Inbox },
-  { href: "/admin/calendario", label: "Calendário", icon: CalendarDays }
+  { href: "/proprietario/reservas", label: "Pedidos de reserva", icon: Inbox }
 ];
 
 export function OwnerSidebar() {

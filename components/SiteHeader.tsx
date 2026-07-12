@@ -10,8 +10,7 @@ import type { UserRole } from "@/lib/types";
 const navLinks = [
   { href: "/autocaravanas", label: "Autocaravanas", visibility: "public" },
   { href: "/cliente", label: "Área do cliente", visibility: "authenticated" },
-  { href: "/proprietario", label: "Proprietário", visibility: "owner" },
-  { href: "/admin", label: "Admin", visibility: "admin" }
+  { href: "/proprietario", label: "Proprietário", visibility: "owner" }
 ];
 
 export function SiteHeader() {
@@ -82,7 +81,6 @@ export function SiteHeader() {
       if (link.visibility === "public") return true;
       if (link.visibility === "authenticated") return Boolean(session);
       if (link.visibility === "owner") return role === "proprietario" || role === "administrador";
-      if (link.visibility === "admin") return role === "administrador";
       return false;
     });
   }, [role, session]);
@@ -122,6 +120,11 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
+          {role === "administrador" ? (
+            <Link href="/admin" className="hover:text-forest">
+              Admin
+            </Link>
+          ) : null}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -171,6 +174,15 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
+            {role === "administrador" ? (
+              <Link
+                href="/admin"
+                className="rounded-md px-3 py-3 hover:bg-stone-100 hover:text-forest"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin
+              </Link>
+            ) : null}
             <Link
               href="/registo"
               className={`rounded-md px-3 py-3 hover:bg-stone-100 hover:text-forest ${displayName ? "hidden" : ""}`}
