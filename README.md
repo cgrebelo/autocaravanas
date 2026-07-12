@@ -33,7 +33,7 @@ cp .env.example .env.local
 Em produção, configure as mesmas variáveis no Cloudflare:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` ou `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `STRIPE_SECRET_KEY`
 - `RESEND_API_KEY` ou variáveis SMTP
@@ -128,6 +128,16 @@ As contas de proprietário devem começar como `pendente`; o administrador valid
 ## Produção
 
 O site usa Supabase para registos, autenticação, veículos e reservas quando as variáveis de ambiente estão configuradas. Os dados em `lib/sample-data.ts` servem apenas como fallback local sem Supabase.
+
+## App Android
+
+O site está preparado como app instalável em Android através de PWA:
+
+1. Abra o site no Chrome do Android.
+2. Toque no menu do Chrome.
+3. Escolha `Adicionar à página inicial` ou `Instalar app`.
+
+Também existe uma base para gerar uma APK em `android-webview`. Antes de gerar a APK, altere o URL em `android-webview/app/src/main/res/values/strings.xml` para o endereço real do site no Cloudflare. Depois abra a pasta `android-webview` no Android Studio e escolha `Build` > `Build Bundle(s) / APK(s)` > `Build APK(s)`.
 
 ## Dados de exemplo
 
