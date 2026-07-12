@@ -57,3 +57,18 @@ export const vehicleCreateSchema = z.object({
   sleeps: z.coerce.number().min(1),
   description: z.string().min(20)
 });
+
+export const adminUserCreateSchema = z.object({
+  fullName: z.string().min(2),
+  email: z.string().email(),
+  username: z.string().min(3).max(32).regex(/^[a-z0-9._-]+$/).optional().or(z.literal("")),
+  phone: z.string().optional(),
+  password: z.string().min(6),
+  role: z.enum(["cliente", "proprietario", "administrador"]),
+  status: z.enum(["ativo", "pendente", "suspenso"]),
+  ownerDisplayName: z.string().optional()
+});
+
+export const adminUserUpdateSchema = adminUserCreateSchema.omit({ password: true }).extend({
+  password: z.string().min(6).optional().or(z.literal(""))
+});

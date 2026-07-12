@@ -72,6 +72,7 @@ export type UserAccount = {
   role: UserRole;
   fullName: string;
   email: string;
+  username?: string;
   phone?: string;
   status: "ativo" | "pendente" | "suspenso";
   createdAt: string;

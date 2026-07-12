@@ -64,14 +64,16 @@ export async function getAdminUsers(): Promise<UserAccount[]> {
   if (error || !data) return [];
 
   return data.map((row) => {
-    const relatedUser = row.users as unknown as { email?: string } | { email?: string }[] | null;
+    const relatedUser = row.users as unknown as { email?: string; username?: string } | { email?: string; username?: string }[] | null;
     const email = Array.isArray(relatedUser) ? relatedUser[0]?.email ?? "" : relatedUser?.email ?? "";
+    const username = Array.isArray(relatedUser) ? relatedUser[0]?.username ?? undefined : relatedUser?.username ?? undefined;
 
     return {
     id: row.id,
     role: row.role,
     fullName: row.full_name,
     email,
+    username,
     phone: row.phone ?? undefined,
     status: row.status,
     createdAt: row.created_at
