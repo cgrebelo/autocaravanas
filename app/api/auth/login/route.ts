@@ -12,16 +12,24 @@ export async function POST(request: Request) {
     const adminEmail = (process.env.ADMIN_EMAIL ?? "admin@rotalivre.pt").trim().toLowerCase();
     let email = identifier;
 
+    const supabase = createServerClient();
+    if (!supabase) return NextResponse.json({ error: "Supabase não está configurado." }, { status: 500 });
+
     if (!identifier.includes("@")) {
       if (identifier === adminUsername) {
         email = adminEmail;
       } else {
-        return NextResponse.json({ error: "Use o email para iniciar sessão." }, { status: 400 });
+        const { data: resolvedEmail, error: resolveError } = await supabase.rpc("get_email_for_username", {
+          requested_username: identifier
+        });
+
+        if (resolveError || !resolvedEmail) {
+          return NextResponse.json({ error: "Utilizador não encontrado." }, { status: 404 });
+        }
+
+        email = resolvedEmail;
       }
     }
-
-    const supabase = createServerClient();
-    if (!supabase) return NextResponse.json({ error: "Supabase não está configurado." }, { status: 500 });
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

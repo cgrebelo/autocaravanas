@@ -322,6 +322,21 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_auth_user();
 
+create or replace function public.get_email_for_username(requested_username text)
+returns text
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select email
+  from public.users
+  where lower(username) = lower(requested_username)
+  limit 1;
+$$;
+
+grant execute on function public.get_email_for_username(text) to anon, authenticated;
+
 create or replace function is_admin()
 returns boolean language sql stable as $$
   select exists (select 1 from profiles where id = auth.uid() and role = 'administrador');
