@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 export function LoginForm() {
+  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +45,9 @@ export function LoginForm() {
         access_token: result.session.access_token,
         refresh_token: result.session.refresh_token
       });
-      setMessage("Sessão iniciada. Já pode reservar ou gerir a sua conta.");
+      setMessage("Sessão iniciada. A abrir a página inicial...");
+      router.push("/");
+      router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível iniciar sessão.");
     } finally {

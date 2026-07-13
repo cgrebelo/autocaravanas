@@ -46,8 +46,8 @@ export function RegisterForm() {
         return;
       }
 
-      setMessage("Conta criada. A abrir a área do cliente...");
-      router.push("/cliente");
+      setMessage("Conta criada. A abrir a página inicial...");
+      router.push("/");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível criar a conta.");
