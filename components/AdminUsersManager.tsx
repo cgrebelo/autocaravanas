@@ -38,6 +38,7 @@ export function AdminUsersManager({ initialUsers }: { initialUsers: UserAccount[
   const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [filter, setFilter] = useState("");
 
   const filteredUsers = useMemo(() => {
@@ -61,23 +62,30 @@ export function AdminUsersManager({ initialUsers }: { initialUsers: UserAccount[
   }
 
   async function loadUsers() {
+    setLoadingUsers(true);
     const token = await getAdminToken();
     if (!token) {
       setMessage("Inicie sessão como administrador para gerir utilizadores.");
+      setLoadingUsers(false);
       return;
     }
 
-    const response = await fetch("/api/admin/users", {
-      headers: { authorization: `Bearer ${token}` }
-    });
-    const result = await response.json();
+    try {
+      const response = await fetch("/api/admin/users", {
+        headers: { authorization: `Bearer ${token}` },
+        cache: "no-store"
+      });
+      const result = await response.json();
 
-    if (!response.ok) {
-      setMessage(getErrorMessage(result.error));
-      return;
+      if (!response.ok) {
+        setMessage(getErrorMessage(result.error));
+        return;
+      }
+
+      setUsers(result.users);
+    } finally {
+      setLoadingUsers(false);
     }
-
-    setUsers(result.users);
   }
 
   function startCreate() {
@@ -182,10 +190,16 @@ export function AdminUsersManager({ initialUsers }: { initialUsers: UserAccount[
       <section>
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
           <h2 className="text-xl font-bold text-forest">Lista de utilizadores</h2>
-          <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Pesquisar utilizadores" className="rounded-md border border-stone-300 px-3 py-2 text-sm" />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Pesquisar utilizadores" className="rounded-md border border-stone-300 px-3 py-2 text-sm" />
+            <button type="button" onClick={loadUsers} className="rounded-md border border-stone-300 px-3 py-2 text-sm font-semibold hover:border-forest hover:text-forest">
+              Atualizar
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 grid gap-4">
+          {loadingUsers ? <p className="rounded-lg border border-stone-200 bg-white p-5 text-sm text-stone-600">A carregar utilizadores...</p> : null}
           {filteredUsers.map((user) => (
             <article key={user.id} className="rounded-lg border border-stone-200 bg-white p-5">
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -204,7 +218,7 @@ export function AdminUsersManager({ initialUsers }: { initialUsers: UserAccount[
               </div>
             </article>
           ))}
-          {filteredUsers.length === 0 ? <p className="rounded-lg border border-stone-200 bg-white p-5 text-sm text-stone-600">Não há utilizadores para mostrar.</p> : null}
+          {!loadingUsers && filteredUsers.length === 0 ? <p className="rounded-lg border border-stone-200 bg-white p-5 text-sm text-stone-600">Não há utilizadores para mostrar.</p> : null}
         </div>
       </section>
     </div>

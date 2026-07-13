@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient, getAuthenticatedUser } from "@/lib/supabase-server";
+import { createAdminClient, createAuthenticatedServerClient, getAuthenticatedUser, getBearerToken } from "@/lib/supabase-server";
 import { adminUserCreateSchema } from "@/lib/validators";
 
 async function requireAdmin(request: Request) {
@@ -39,19 +39,46 @@ function mapUser(row: {
 }
 
 export async function GET(request: Request) {
-  const auth = await requireAdmin(request);
-  if (auth.error) return auth.error;
+  const user = await getAuthenticatedUser(request);
+  if (!user) return NextResponse.json({ error: "Inicie sessão." }, { status: 401 });
 
-  const { data, error } = await auth.supabase
-    .from("profiles")
-    .select("id, role, full_name, phone, status, created_at, users(email, username)")
-    .order("created_at", { ascending: false });
+  const token = getBearerToken(request);
+  if (!token) return NextResponse.json({ error: "Sessão inválida." }, { status: 401 });
 
-  if (error || !data) {
-    return NextResponse.json({ error: error?.message ?? "Não foi possível carregar utilizadores." }, { status: 400 });
+  const supabase = createAuthenticatedServerClient(token);
+  if (!supabase) return NextResponse.json({ error: "Supabase não está configurado." }, { status: 500 });
+
+  const { data: currentProfile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (currentProfile?.role !== "administrador") {
+    return NextResponse.json({ error: "Acesso reservado ao administrador." }, { status: 403 });
   }
 
-  return NextResponse.json({ users: data.map((row) => mapUser(row as Parameters<typeof mapUser>[0])) });
+  const [{ data: profiles, error: profilesError }, { data: userRows, error: usersError }] = await Promise.all([
+    supabase.from("profiles").select("id, role, full_name, phone, status, created_at").order("created_at", { ascending: false }),
+    supabase.from("users").select("id, email, username")
+  ]);
+
+  if (profilesError || usersError || !profiles) {
+    return NextResponse.json({ error: profilesError?.message ?? usersError?.message ?? "Não foi possível carregar utilizadores." }, { status: 400 });
+  }
+
+  const usersById = new Map((userRows ?? []).map((row) => [row.id, row]));
+  const users = profiles.map((profile) => {
+    const relatedUser = usersById.get(profile.id);
+
+    return {
+      id: profile.id,
+      role: profile.role,
+      fullName: profile.full_name,
+      email: relatedUser?.email ?? "",
+      username: relatedUser?.username ?? "",
+      phone: profile.phone ?? "",
+      status: profile.status,
+      createdAt: profile.created_at
+    };
+  });
+
+  return NextResponse.json({ users });
 }
 
 export async function POST(request: Request) {
