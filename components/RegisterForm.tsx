@@ -1,11 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase";
 
 export function RegisterForm() {
-  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -39,16 +36,8 @@ export function RegisterForm() {
         return;
       }
 
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        setMessage("Conta criada. Já pode iniciar sessão.");
-        return;
-      }
-
-      setMessage("Conta criada. A abrir a página inicial...");
-      router.push("/");
-      router.refresh();
+      setMessage(result.nextStep ?? "Conta criada. Confirme o registo no email que enviámos.");
+      event.currentTarget.reset();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível criar a conta.");
     } finally {

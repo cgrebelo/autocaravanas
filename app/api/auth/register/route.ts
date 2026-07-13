@@ -12,11 +12,13 @@ export async function POST(request: Request) {
 
     const status = parsed.data.role === "proprietario" ? "pendente" : "ativo";
     const username = parsed.data.username?.trim() || null;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
 
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
+        emailRedirectTo: `${siteUrl.replace(/\/$/, "")}/login?confirmado=1`,
         data: {
           full_name: parsed.data.fullName,
           username,
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
       id: data.user.id,
       role: parsed.data.role,
       status,
-      nextStep: parsed.data.role === "proprietario" ? "O administrador vai validar a conta de proprietário." : "Conta criada. A iniciar sessão..."
+      nextStep: "Conta criada. Confirme o registo no email que enviámos."
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Não foi possível criar a conta.";

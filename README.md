@@ -32,11 +32,24 @@ cp .env.example .env.local
 
 Em produção, configure as mesmas variáveis no Cloudflare:
 
+- `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` ou `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `STRIPE_SECRET_KEY`
 - `RESEND_API_KEY` ou variáveis SMTP
+
+No Supabase, em `Authentication` > `URL Configuration`, configure:
+
+- `Site URL`: o URL público do site
+- `Redirect URLs`: o URL público do site e o URL `/login?confirmado=1`
+
+Exemplo:
+
+```txt
+https://o-teu-site.pages.dev
+https://o-teu-site.pages.dev/login?confirmado=1
+```
 
 ## Supabase
 
